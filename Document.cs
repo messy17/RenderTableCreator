@@ -14,10 +14,9 @@ namespace RenderTableCreator
         {
             wordApp = new();
             document = wordApp.Documents.Add(ref missing, ref missing, ref missing, ref missing);
-            AddHeader(WdParagraphAlignment.wdAlignParagraphCenter, WdColorIndex.wdBlue, 10, "Property of College Kings");
         }
 
-        private void AddHeader(WdParagraphAlignment alignment, WdColorIndex fontColor, int fontSize, string text)
+        public void AddHeader(WdParagraphAlignment alignment, WdColorIndex fontColor, int fontSize, string text)
         {
             foreach (Section section in document.Sections)
             {
@@ -30,7 +29,7 @@ namespace RenderTableCreator
             }
         }
 
-        private void AddFooter(WdParagraphAlignment alignment, WdColorIndex fontColor, int fontSize, string text)
+        public void AddFooter(WdParagraphAlignment alignment, WdColorIndex fontColor, int fontSize, string text)
         {
             foreach (Section section in document.Sections)
             {
@@ -42,7 +41,7 @@ namespace RenderTableCreator
             }
         }
 
-        private void AddHeading(string style, string text)
+        public void AddHeading(string style, string text)
         {
             Paragraph paragraph = document.Content.Paragraphs.Add(ref missing);
             object headingStyle = style;
@@ -51,13 +50,13 @@ namespace RenderTableCreator
             paragraph.Range.InsertParagraphAfter();
         }
 
-        private void AddParagraph(string text)
+        public void AddParagraph(string text)
         {
             document.Content.SetRange(0, 0);
             document.Content.Text = text;
         }
 
-        private void CreateTable()
+        public void CreateTable()
         {
             Paragraph paragraph = document.Content.Paragraphs.Add(ref missing);
 
@@ -86,7 +85,7 @@ namespace RenderTableCreator
             }
         }
 
-        private void SaveDocument()
+        public void SaveDocument()
         {
             object filename = @"c:\temp1.docx";
             document.SaveAs2(ref filename);
