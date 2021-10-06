@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Windows;
 
 namespace RenderTableCreator
@@ -53,17 +52,6 @@ namespace RenderTableCreator
             }
         }
 
-        //    CreateDocument();
-        //    if (errorText == "ERRORS FOUND IN TRANSCRIPT. FIX THEM AND TRY AGAIN:")
-        //    {
-        //        SuccessfulConvert();
-        //    }
-        //    else
-        //    {
-        //        FailedConvert();
-        //    }
-        //}
-
         private void CreateRenderTableButton_Click(object sender, RoutedEventArgs e)
         {
             List<string> speakers = new();
@@ -76,7 +64,6 @@ namespace RenderTableCreator
 
             while ((line = file.ReadLine()) != null)
             {
-                //AddLog($"Working on: {line}");
                 lineNumber++;
                 line = line.Trim();
 
