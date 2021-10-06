@@ -1,18 +1,18 @@
-﻿using System.Reflection;
+﻿using Microsoft.Office.Interop.Word;
+using System.Reflection;
 using System.Windows;
-using Microsoft.Office.Interop.Word;
 
 namespace RenderTableCreator
 {
-    internal class Document
+    public class Document
     {
-        private Microsoft.Office.Interop.Word.Application wordApp;
+        internal _Application wordApp;
         private Microsoft.Office.Interop.Word.Document document;
         private object missing = Missing.Value;
 
         public Document()
         {
-            wordApp = new();
+            wordApp = new Microsoft.Office.Interop.Word.Application();
             document = wordApp.Documents.Add(ref missing, ref missing, ref missing, ref missing);
         }
 
@@ -20,7 +20,7 @@ namespace RenderTableCreator
         {
             foreach (Section section in document.Sections)
             {
-                Microsoft.Office.Interop.Word.Range headerRange = section.Headers[WdHeaderFooterIndex.wdHeaderFooterPrimary].Range;
+                Range headerRange = section.Headers[WdHeaderFooterIndex.wdHeaderFooterPrimary].Range;
                 headerRange.Fields.Add(headerRange, WdFieldType.wdFieldPage);
                 headerRange.ParagraphFormat.Alignment = alignment;
                 headerRange.Font.ColorIndex = fontColor;
@@ -33,7 +33,7 @@ namespace RenderTableCreator
         {
             foreach (Section section in document.Sections)
             {
-                Microsoft.Office.Interop.Word.Range footerRange = section.Headers[WdHeaderFooterIndex.wdHeaderFooterPrimary].Range;
+                Range footerRange = section.Headers[WdHeaderFooterIndex.wdHeaderFooterPrimary].Range;
                 footerRange.ParagraphFormat.Alignment = alignment;
                 footerRange.Font.ColorIndex = fontColor;
                 footerRange.Font.Size = fontSize;
@@ -52,48 +52,41 @@ namespace RenderTableCreator
 
         public void AddParagraph(string text)
         {
-            document.Content.SetRange(0, 0);
-            document.Content.Text = text;
+            Paragraph paragraph = document.Content.Paragraphs.Add(ref missing);
+            object headingStyle = "Normal";
+            paragraph.Range.set_Style(ref headingStyle);
+            paragraph.Range.Text = text;
+            paragraph.Range.InsertParagraphAfter();
         }
 
-        public void CreateTable()
+        public Table CreateTable(int columns, int rows)
         {
             Paragraph paragraph = document.Content.Paragraphs.Add(ref missing);
 
-            Table table = document.Tables.Add(paragraph.Range, 5, 5, ref missing, ref missing);
+            Table table = document.Tables.Add(paragraph.Range, rows, columns, ref missing, ref missing);
             table.Borders.Enable = 1;
-            foreach (Row row in table.Rows)
-            {
-                foreach (Cell cell in row.Cells)
-                {
-                    // Header row
-                    if (cell.RowIndex == 1)
-                    {
-                        cell.Range.Text = $"Column {cell.ColumnIndex.ToString()}";
-                        cell.Range.Font.Bold = 1;
-                        cell.Range.Font.Size = 10;
-
-                        cell.Shading.BackgroundPatternColor = WdColor.wdColorGray25;
-                        cell.VerticalAlignment = WdCellVerticalAlignment.wdCellAlignVerticalCenter;
-                        cell.Range.ParagraphFormat.Alignment = WdParagraphAlignment.wdAlignParagraphCenter;
-                    }
-                    else
-                    {
-                        cell.Range.Text = (cell.RowIndex - 2 + cell.ColumnIndex).ToString();
-                    }
-                }
-            }
+            return table;
         }
 
-        public void SaveDocument()
+        public void SaveDocument(string _filename)
         {
-            object filename = @"c:\temp1.docx";
-            document.SaveAs2(ref filename);
-            document.Close(ref missing, ref missing, ref missing);
-            document = null;
-            wordApp.Quit(ref missing, ref missing, ref missing);
-            wordApp = null;
-            MessageBox.Show("Document created successfully !");
+            object filename = _filename;
+            try
+            {
+                document.SaveAs2(ref filename);
+            }
+            catch
+            {
+                MessageBox.Show("Failed to save document");
+
+            }
+            finally
+            {
+                document.Close(ref missing, ref missing, ref missing);
+                document = null;
+                wordApp.Quit(ref missing, ref missing, ref missing);
+                wordApp = null;
+            }
         }
     }
 }
