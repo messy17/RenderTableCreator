@@ -161,6 +161,7 @@ namespace RenderTableCreator
             {
                 AddLog(errorText);
             }
+
             if (warnText != "WARNINGS:")
             {
                 AddLog(warnText);
