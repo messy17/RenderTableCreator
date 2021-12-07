@@ -11,9 +11,6 @@
         <TextBlock Name="ChosenFile" Text="No file selected" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="16" Foreground="White" Margin="0,10,0,0" TextAlignment="Center" Height="22" />
         <Button Name="BrowseFilesButton" Content="Browse Files" Click="BrowseFiles_Click" Height="28" FontSize="16" Foreground="White" Margin="0,45,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Background="{x:Null}" Width="108"/>
         <Button Name="CreateRenderTableButton" Content="Create Render Table" Click="CreateRenderTableButton_Click" Height="28" FontSize="16" Foreground="White" Margin="0,78,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Background="{x:Null}" Width="160" Visibility="Hidden"/>
-
-        <ScrollViewer Margin="0,111,0,10">
-            <TextBlock Name="WindowOutput" Foreground="White" Padding="10, 1, 10, 1"/>
-        </ScrollViewer>
+        <TextBox x:Name="WindowOutput" TextWrapping="Wrap" Background="#FF434343" Foreground="White" FontSize="14" IsReadOnly="True" AcceptsReturn="True" IsUndoEnabled="False" Margin="10,134,10,10" VerticalScrollBarVisibility="Auto" BorderThickness="0,0,0,0"/>
     </Grid>
 </Window>
