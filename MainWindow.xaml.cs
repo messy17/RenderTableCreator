@@ -8,10 +8,10 @@ using Spire.Doc.Documents;
 
 namespace RenderTableCreator
 {
-    public partial class MainWindow : System.Windows.Window
+    public partial class MainWindow : Window
     {
         private List<RenderItem> renderList = new();
-        private SortedDictionary<string, RenderItem> scenes = new();
+        private readonly SortedDictionary<string, RenderItem> scenes = new();
 
         private string selectedFile;
         private string renderTableFile;
@@ -21,13 +21,13 @@ namespace RenderTableCreator
         // which prevents having a mix of scene v15s2_9a and v14s15_9a 
         // in the same file. Inconsistent version numbers will report an error
         // and block creating the table
-        private string version = String.Empty; 
+        private string version = string.Empty; 
 
         internal static string errorText = "ERRORS FOUND IN TRANSCRIPT. FIX THEM AND TRY AGAIN:";
         internal static string warnText = "WARNINGS:";
 
-        private List<string> outputLog = new();
-        private List<string> notes = new();
+        private readonly List<string> outputLog = new();
+        private readonly List<string> notes = new();
 
         public MainWindow()
         {
@@ -63,9 +63,9 @@ namespace RenderTableCreator
             // Reset the state each time the create render table button is clicked
             
             WindowOutput.Clear();
-            outputLog.Clear(); 
+            outputLog.Clear();
             notes.Clear();
-            scenes.Clear(); 
+            scenes.Clear();
             errorText = "ERRORS FOUND IN TRANSCRIPT. FIX THEM AND TRY AGAIN:";
             warnText = "WARNINGS:";
 
@@ -103,7 +103,7 @@ namespace RenderTableCreator
 
         private void CreateRenderItem(string line, int lineNumber)
         {
-            if(line.StartsWith("scene") || line.StartsWith("show"))
+            if (line.StartsWith("scene") || line.StartsWith("show"))
             {
                 string[] lineArgs = line.Split(' ');
                 string imageName = lineArgs[1];
@@ -116,30 +116,34 @@ namespace RenderTableCreator
                 }
                 else
                 {
-                    string currentVersion = imageName.Substring(0, 3); 
-                    if(0 !=String.Compare(version, currentVersion, StringComparison.OrdinalIgnoreCase))
+                    string currentVersion = imageName.Substring(0, 3);
+                    if (0 != string.Compare(version, currentVersion, StringComparison.OrdinalIgnoreCase))
                     {
                         errorText += $"\n{imageName}: Conflicting version found at line {lineNumber}.\nThe version should be {version}";
                     }
                 }
                 // END BUGFIX 
                 
-                if (0 == String.Compare(imageName, "black", true))
+                if (0 == string.Compare(imageName, "black", true))
+                {
                     return;
+                }
 
-                string imageDesc = String.Empty; 
-                
+                string imageDesc = string.Empty;
+
                 if (lineArgs.Length > 2)
-                    imageDesc = string.Join(' ',lineArgs[3..]);
+                {
+                    imageDesc = string.Join(' ', lineArgs[3..]);
+                }
 
                 // Normalize the description
                 imageDesc = imageDesc.Replace('#', ' ').Trim();
 
                 // current scene not in the list; New Scene
-                if(!scenes.ContainsKey(imageName))
+                if (!scenes.ContainsKey(imageName))
                 {
                     // New scene without a render description; Error case
-                    if (String.IsNullOrEmpty(imageDesc))
+                    if (string.IsNullOrEmpty(imageDesc))
                     {
                         warnText += $"\n{imageName}: Missing description at line {lineNumber}";
                     }
@@ -156,12 +160,12 @@ namespace RenderTableCreator
                 else
                 {
                     // Scene Reuse; legit use case 
-                    if(String.IsNullOrEmpty(imageDesc))
+                    if (String.IsNullOrEmpty(imageDesc))
                     {
                         scenes[imageName].RefCount++;
-                    }                   
+                    }
                     //Existing scene with a different render description than previous; Error case
-                    else if(!imageDesc.Equals(scenes[imageName].Description))
+                    else if (!imageDesc.Equals(scenes[imageName].Description))
                     {
                         int originalLineNumber = scenes[imageName].LineNumber;
                         
@@ -176,31 +180,31 @@ namespace RenderTableCreator
         {
             AltDocument document = new();
   
-            document.AddHeading(String.Format("{0} Render Table", sceneName), BuiltinStyle.Title);
+            document.AddHeading($"{sceneName} Render Table", BuiltinStyle.Title);
             document.AddHeading("Scene Notes:", BuiltinStyle.Heading1);
-            document.AddParagraph(String.Join("\n", notes));
-            document.AddParagraph(String.Format("Render count: {0}", renderList.Count));
+            document.AddParagraph(string.Join("\n", notes));
+            document.AddParagraph($"Render count: {renderList.Count}");
             document.AddHeading("Render Table:", BuiltinStyle.Heading1);
-            document.AddParagraph(String.Empty);
-            
-            String[] tableHeadings = { "Scene", "Description", "Occurrences" };
+            document.AddParagraph(string.Empty);
+
+            string[] tableHeadings = { "Scene", "Description", "Occurrences" };
             document.AddTable(tableHeadings, renderList);
 
             document.SaveDocument(renderTableFile);
-            AddLog(String.Format("Render Table Created Successfully for {0}", sceneName));
+            AddLog($"Render Table Created Successfully for {sceneName}");
 
-        }                
+        }
 
         private void SuccessfulConvert()
-        {            
+        {
             renderList = scenes.Values.ToList();
-            OrderList(ref renderList); 
-            CreateDocument(); 
+            OrderList(ref renderList);
+            CreateDocument();
         }
 
         private void FailedConvert()
         {
-            AddLog(String.Format("Failed to create render table for {0}.", sceneName));
+            AddLog($"Failed to create render table for {sceneName}.");
             if (errorText != "ERRORS FOUND IN TRANSCRIPT. FIX THEM AND TRY AGAIN:")
             {
                 AddLog(errorText);
@@ -211,12 +215,11 @@ namespace RenderTableCreator
             }
         }
 
-        private void OrderList(ref List<RenderItem> list)
+        private static void OrderList(ref List<RenderItem> list)
         {
-            bool change = false; 
+            bool change = false;
             do
             {
-
                 for (int previous = 0; previous < list.Count - 1; previous++)
                 {
                     int current = previous + 1;
@@ -227,21 +230,20 @@ namespace RenderTableCreator
                     if (cInt < pInt)
                     {
                         SwampListEntries(previous, current, ref list);
-                        change = true; 
+                        change = true;
 
                     }
                     else if (cInt == pInt)
                     {
-                        char cLetter = list[current].ImageName[list[current].ImageName.Length - 1];
-                        char pLetter = list[previous].ImageName[list[previous].ImageName.Length - 1];
+                        char cLetter = list[current].ImageName[^1];
+                        char pLetter = list[previous].ImageName[^1];
 
                         if (cLetter < pLetter)
                         {
                             SwampListEntries(previous, current, ref list);
-                            change = true; 
+                            change = true;
                         }
                     }
-
                 }
             } while (change);
             
@@ -255,27 +257,33 @@ namespace RenderTableCreator
         }
 
         private static int GetImageNumber(string imageName)
-        {            
+        {
             int retval = -1;
 
-            if (String.IsNullOrEmpty(imageName))
-                return retval; 
+            if (string.IsNullOrEmpty(imageName))
+            {
+                return retval;
+            }
 
             int underScorePos = imageName.IndexOf("_");
 
             if (underScorePos == -1)
-                return retval; 
-            
-            String intStr = imageName.Substring(underScorePos + 1, imageName.Length - (underScorePos + 1));
-            if (!Int32.TryParse(intStr, out retval))
+            {
+                return retval;
+            }
+
+            string intStr = imageName[(underScorePos + 1)..];
+            if (!int.TryParse(intStr, out retval))
             {
                 intStr = intStr.Remove(intStr.Length - 1);
 
-                if (!Int32.TryParse(intStr, out retval))
-                    retval = -1;     
+                if (!int.TryParse(intStr, out retval))
+                {
+                    retval = -1;
+                }
             }
 
-            return retval; 
+            return retval;
 
         }
     }
