@@ -17,6 +17,12 @@ namespace RenderTableCreator
         private string renderTableFile;
         private string sceneName;
 
+        // BUGFIX - Need to enforce consistent version numbers
+        // which prevents having a mix of scene v15s2_9a and v14s15_9a 
+        // in the same file. Inconsistent version numbers will report an error
+        // and block creating the table
+        private string version = String.Empty; 
+
         internal static string errorText = "ERRORS FOUND IN TRANSCRIPT. FIX THEM AND TRY AGAIN:";
         internal static string warnText = "WARNINGS:";
 
@@ -83,7 +89,7 @@ namespace RenderTableCreator
                 }
                 else { inNotes = false; }
 
-                CreateRenderItem2(line, lineNumber); 
+                CreateRenderItem(line, lineNumber); 
             }
 
             if (errorText == "ERRORS FOUND IN TRANSCRIPT. FIX THEM AND TRY AGAIN:" && warnText == "WARNINGS:")
@@ -95,12 +101,28 @@ namespace RenderTableCreator
 
         }
 
-        private void CreateRenderItem2(string line, int lineNumber)
+        private void CreateRenderItem(string line, int lineNumber)
         {
             if(line.StartsWith("scene") || line.StartsWith("show"))
             {
                 string[] lineArgs = line.Split(' ');
                 string imageName = lineArgs[1];
+
+                // BUGFIX: Enforce version consistency by checking the version 
+                // of each scene to the first scene. Error on any inconsisency. 
+                if(String.IsNullOrEmpty(version))
+                {
+                    version = imageName.Substring(0, 3);
+                }
+                else
+                {
+                    string currentVersion = imageName.Substring(0, 3); 
+                    if(0 !=String.Compare(version, currentVersion, StringComparison.OrdinalIgnoreCase))
+                    {
+                        errorText += $"\n{imageName}: Conflicting version found at line {lineNumber}.\nThe version should be {version}";
+                    }
+                }
+                // END BUGFIX 
                 
                 if (0 == String.Compare(imageName, "black", true))
                     return;
@@ -150,7 +172,7 @@ namespace RenderTableCreator
             }
         }
         
-        private void CreateDocument2()
+        private void CreateDocument()
         {
             AltDocument document = new();
   
@@ -170,11 +192,10 @@ namespace RenderTableCreator
         }                
 
         private void SuccessfulConvert()
-        {
-            // CreateDocument();
+        {            
             renderList = scenes.Values.ToList();
             OrderList(ref renderList); 
-            CreateDocument2(); 
+            CreateDocument(); 
         }
 
         private void FailedConvert()
@@ -194,7 +215,7 @@ namespace RenderTableCreator
         {
             bool change = false; 
             do
-            {                
+            {
 
                 for (int previous = 0; previous < list.Count - 1; previous++)
                 {
