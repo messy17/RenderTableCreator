@@ -198,7 +198,7 @@ namespace RenderTableCreator
         private void SuccessfulConvert()
         {
             renderList = scenes.Values.ToList();
-            OrderList(ref renderList);
+            renderList.Sort(Comparison);
             CreateDocument();
         }
 
@@ -215,45 +215,38 @@ namespace RenderTableCreator
             }
         }
 
-        private static void OrderList(ref List<RenderItem> list)
+        private static int Comparison(RenderItem first, RenderItem second)
         {
-            bool change = false;
-            do
+            int firstImageNumber = GetImageNumber(first.ImageName);
+            int secondImageNumber = GetImageNumber(second.ImageName);
+
+            if (firstImageNumber < secondImageNumber)
             {
-                for (int previous = 0; previous < list.Count - 1; previous++)
+                return -1;
+            }
+            else if (firstImageNumber > secondImageNumber)
+            {
+                return 1;
+            }
+            else
+            {
+                char firstImageLetter = first.ImageName[^1];
+                char secondImageLetter = second.ImageName[^1];
+
+                if (firstImageLetter < secondImageLetter)
                 {
-                    int current = previous + 1;
-
-                    int cInt = GetImageNumber(list[current].ImageName);
-                    int pInt = GetImageNumber(list[previous].ImageName);
-
-                    if (cInt < pInt)
-                    {
-                        SwampListEntries(previous, current, ref list);
-                        change = true;
-
-                    }
-                    else if (cInt == pInt)
-                    {
-                        char cLetter = list[current].ImageName[^1];
-                        char pLetter = list[previous].ImageName[^1];
-
-                        if (cLetter < pLetter)
-                        {
-                            SwampListEntries(previous, current, ref list);
-                            change = true;
-                        }
-                    }
+                    return -1;
                 }
-            } while (change);
-            
-        }
-
-        private static void SwampListEntries(int posA, int posB,  ref List<RenderItem> list)
-        {
-            RenderItem placholder = list[posB];
-            list[posB] = list[posA];
-            list[posA] = placholder;
+                else if (firstImageLetter > secondImageLetter)
+                {
+                    return 1;
+                }
+                else
+                {
+                    MessageBox.Show("Sort Error, message Oscar ;D");
+                    return 0;
+                }
+            }
         }
 
         private static int GetImageNumber(string imageName)
@@ -284,7 +277,6 @@ namespace RenderTableCreator
             }
 
             return retval;
-
         }
     }
 }
