@@ -169,7 +169,7 @@ namespace RenderTableCreator
                     {
                         int originalLineNumber = scenes[imageName].LineNumber;
                         
-                        errorText += $"\n{imageName}: Conflicting description found at line {lineNumber} with orignal description at line {originalLineNumber}.";
+                        errorText += $"\n{imageName}: Conflicting description found at line {lineNumber} with original description at line {originalLineNumber}.";
                     }
 
                 }
