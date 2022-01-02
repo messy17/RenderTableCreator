@@ -108,6 +108,14 @@ namespace RenderTableCreator
                 string[] lineArgs = line.Split(' ');
                 string imageName = lineArgs[1];
 
+                // BUGFIX: Image names that end with an underscore
+                if(imageName.EndsWith('_'))
+                {
+                    errorText += $"\nImage name {imageName} on line {lineNumber} ends with an underscore (missing scene number)."; 
+                }
+                // END BUGIFX
+
+
                 // BUGFIX: Enforce version consistency by checking the version 
                 // of each scene to the first scene. Error on any inconsisency. 
                 if(String.IsNullOrEmpty(version))
@@ -198,7 +206,7 @@ namespace RenderTableCreator
         private void SuccessfulConvert()
         {
             renderList = scenes.Values.ToList();
-            renderList.Sort(Comparison);
+            //renderList.Sort(Comparison);  // TEMP BUG FIX- inconsistent scene name syntaxes are causing sort function to blow up.
             CreateDocument();
         }
 
