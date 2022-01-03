@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows;
-using Spire.Doc.Documents; 
+using Spire.Doc.Documents;
+using System.Text.RegularExpressions;
 
 namespace RenderTableCreator
 {
@@ -217,66 +218,63 @@ namespace RenderTableCreator
 
         private static int Comparison(RenderItem first, RenderItem second)
         {
-            int firstImageNumber = GetImageNumber(first.ImageName);
-            int secondImageNumber = GetImageNumber(second.ImageName);
+            string firstImageId = first.ImageName.Split("_")[^1];
+            string secondImageId = second.ImageName.Split("_")[^1];
 
-            if (firstImageNumber < secondImageNumber)
+            // Split first image number and image letter
+            int? firstImageNumber = null;
+            string firstImageLetter = string.Empty;
+            for (int i = 0; i < firstImageId.Length; i++)
             {
-                return -1;
+                if (Regex.IsMatch(firstImageId[i].ToString(), "[a-z]", RegexOptions.IgnoreCase))
+                {
+
+                    try { firstImageNumber = int.Parse(firstImageId.Substring(0, i)); }
+                    catch { }
+                    firstImageLetter = firstImageId[i..];
+                    break;
+                    }
             }
-            else if (firstImageNumber > secondImageNumber)
+
+            // Id must be number
+            if (firstImageLetter == string.Empty)
             {
-                return 1;
+                firstImageNumber = int.Parse(firstImageId);
             }
+
+            // Split second image number and image letter
+            int? secondImageNumber = null;
+            string secondImageLetter = string.Empty;
+            for (int i = 0; i < secondImageId.Length; i++)
+            {
+                if (Regex.IsMatch(secondImageId[i].ToString(), "[a-z]", RegexOptions.IgnoreCase))
+                {
+                    try { secondImageNumber = int.Parse(secondImageId.Substring(0, i)); }
+                    catch { }
+                    secondImageLetter = secondImageId[i..];
+                    break;
+                }
+            }
+
+            // Id must be number
+            if (secondImageLetter == string.Empty)
+            {
+                secondImageNumber = int.Parse(secondImageId);
+            }
+
+            // Image is invalid format, compare raw names
+            if (firstImageNumber is null || secondImageNumber is null)
+            {
+                return string.Compare(first.ImageName, second.ImageName, ignoreCase: true);
+            }
+
+            // Compare image components
             else
             {
-                char firstImageLetter = first.ImageName[^1];
-                char secondImageLetter = second.ImageName[^1];
-
-                if (firstImageLetter < secondImageLetter)
-                {
-                    return -1;
-                }
-                else if (firstImageLetter > secondImageLetter)
-                {
-                    return 1;
-                }
-                else
-                {
-                    MessageBox.Show("Sort Error, message Oscar ;D");
-                    return 0;
-                }
+                if (firstImageNumber < secondImageNumber) return -1;
+                else if (firstImageNumber > secondImageNumber) return 1;
+                else return string.Compare(firstImageLetter, secondImageLetter, ignoreCase: true);
             }
-        }
-
-        private static int GetImageNumber(string imageName)
-        {
-            int retval = -1;
-
-            if (string.IsNullOrEmpty(imageName))
-            {
-                return retval;
-            }
-
-            int underScorePos = imageName.IndexOf("_");
-
-            if (underScorePos == -1)
-            {
-                return retval;
-            }
-
-            string intStr = imageName[(underScorePos + 1)..];
-            if (!int.TryParse(intStr, out retval))
-            {
-                intStr = intStr.Remove(intStr.Length - 1);
-
-                if (!int.TryParse(intStr, out retval))
-                {
-                    retval = -1;
-                }
-            }
-
-            return retval;
         }
     }
 }
