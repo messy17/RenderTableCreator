@@ -207,6 +207,7 @@ namespace RenderTableCreator
         {
             renderList = scenes.Values.ToList();
             //renderList.Sort(Comparison);  // TEMP BUG FIX- inconsistent scene name syntaxes are causing sort function to blow up.
+            OrderList2(ref renderList);
             CreateDocument();
         }
 
@@ -286,5 +287,74 @@ namespace RenderTableCreator
 
             return retval;
         }
+
+        private void OrderList2(ref List<RenderItem> list)
+        {
+            bool change = false;
+
+            do
+            {
+                change = false;
+
+                for (int previous = 0; previous < list.Count - 1; previous++)
+                {
+                    int current = previous + 1;
+
+                    int result = list[current].CompareTo(list[previous]);
+
+                    if (-1 == result)
+                    {
+                        SwapListEntries(previous, current, ref list);
+                        change = true;
+                    }
+
+                }
+            } while (change);
+        }
+
+        private void OrderList(ref List<RenderItem> list)
+        {
+            bool change = false;
+            do
+            {
+                change = false;
+
+                for (int previous = 0; previous < list.Count - 1; previous++)
+                {
+                    int current = previous + 1;
+
+                    int cInt = GetImageNumber(list[current].ImageName);
+                    int pInt = GetImageNumber(list[previous].ImageName);
+
+                    if (cInt < pInt)
+                    {
+                        SwapListEntries(previous, current, ref list);
+                        change = true;
+
+                    }
+                    else if (cInt == pInt)
+                    {
+                        char cLetter = list[current].ImageName[list[current].ImageName.Length - 1];
+                        char pLetter = list[previous].ImageName[list[previous].ImageName.Length - 1];
+
+                        if (cLetter < pLetter)
+                        {
+                            SwapListEntries(previous, current, ref list);
+                            change = true;
+                        }
+                    }
+
+                }
+            } while (change);
+
+        }
+
+        private static void SwapListEntries(int posA, int posB, ref List<RenderItem> list)
+        {
+            RenderItem placholder = list[posB];
+            list[posB] = list[posA];
+            list[posA] = placholder;
+        }
+       
     }
 }
