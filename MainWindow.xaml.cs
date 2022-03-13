@@ -82,7 +82,7 @@ namespace RenderTableCreator
                 lineNumber++;
                 line = line.Trim();
 
-                if (line.StartsWith("#") && inNotes)
+                if (line.StartsWith("#") && inNotes && !line.StartsWith("#!") )
                 {
                     notes.Add(line[1..].Trim());
                     continue;
@@ -103,8 +103,27 @@ namespace RenderTableCreator
 
         private void CreateRenderItem(string line, int lineNumber)
         {
-            if (line.StartsWith("scene") || line.StartsWith("show"))
+            //BUG FIX - Skip list 
+            // Free roam scenes have statements like 
+            // Scene Expression
+            // Scene black
+            // That prevent creating the render table
+            // This code implement a Skiplist to filter out 
+            // scene or show statements that otherwise cause issues creating the render table
+            // also added dectection for animations - if the line contains the works ignore AND anim.
+            bool skip = false;
+
+            if (line.ToLower().StartsWith("scene expression") ||
+                line.ToLower().StartsWith("scene black") ||
+                (line.ToLower().Contains("ignore") && line.ToLower().Contains("anim")) )
             {
+                skip = true; 
+            }
+            // END BUGFIX 
+            
+            else if (line.ToLower().StartsWith("scene") || line.ToLower().StartsWith("show") || line.ToLower().StartsWith("#!") && !skip)
+            {
+
                 string[] lineArgs = line.Split(' ');
                 string imageName = lineArgs[1];
 
@@ -139,9 +158,14 @@ namespace RenderTableCreator
 
                 string imageDesc = string.Empty;
 
+                if(line.ToLower().StartsWith("#!"))
+                {
+                    imageDesc += "KIWII IMAGE: ";
+                }
+
                 if (lineArgs.Length > 2)
                 {
-                    imageDesc = string.Join(' ', lineArgs[3..]);
+                    imageDesc += string.Join(' ', lineArgs[3..]);
                 }
 
                 // Normalize the description
@@ -183,6 +207,28 @@ namespace RenderTableCreator
                 }
             }
         }
+
+        private int TotalRenderCount()
+        {
+            int retval = 0; 
+            foreach(RenderItem r in scenes.Values)
+            {
+                retval += r.RefCount;
+            }
+
+            return retval;
+        }
+
+        private int ReusedRenderCount()
+        {
+            int retval = 0;
+            foreach(RenderItem r in scenes.Values)
+            {
+                retval += r.RefCount - 1; 
+            }
+
+            return retval; 
+        }
         
         private void CreateDocument()
         {
@@ -191,7 +237,13 @@ namespace RenderTableCreator
             document.AddHeading($"{sceneName} Render Table", BuiltinStyle.Title);
             document.AddHeading("Scene Notes:", BuiltinStyle.Heading1);
             document.AddParagraph(string.Join("\n", notes));
-            document.AddParagraph($"Render count: {renderList.Count}");
+            document.AddParagraph($"Unique Render count: {renderList.Count}");
+            document.AddParagraph($"Total Render count: {TotalRenderCount()}");
+            document.AddParagraph($"Reused Render count: {ReusedRenderCount()}");
+
+            int percent = (int)  (100 * (ReusedRenderCount() / (double) TotalRenderCount()));
+
+            document.AddParagraph($"Reused %: {percent}");
             document.AddHeading("Render Table:", BuiltinStyle.Heading1);
             document.AddParagraph(string.Empty);
 
