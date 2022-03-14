@@ -362,42 +362,42 @@ namespace RenderTableCreator
             } while (change);
         }
 
-        private void OrderList(ref List<RenderItem> list)
-        {
-            bool change = false;
-            do
-            {
-                change = false;
+        //private void OrderList(ref List<RenderItem> list)
+        //{
+        //    bool change = false;
+        //    do
+        //    {
+        //        change = false;
 
-                for (int previous = 0; previous < list.Count - 1; previous++)
-                {
-                    int current = previous + 1;
+        //        for (int previous = 0; previous < list.Count - 1; previous++)
+        //        {
+        //            int current = previous + 1;
 
-                    int cInt = GetImageNumber(list[current].ImageName);
-                    int pInt = GetImageNumber(list[previous].ImageName);
+        //            int cInt = GetImageNumber(list[current].ImageName);
+        //            int pInt = GetImageNumber(list[previous].ImageName);
 
-                    if (cInt < pInt)
-                    {
-                        SwapListEntries(previous, current, ref list);
-                        change = true;
+        //            if (cInt < pInt)
+        //            {
+        //                SwapListEntries(previous, current, ref list);
+        //                change = true;
 
-                    }
-                    else if (cInt == pInt)
-                    {
-                        char cLetter = list[current].ImageName[list[current].ImageName.Length - 1];
-                        char pLetter = list[previous].ImageName[list[previous].ImageName.Length - 1];
+        //            }
+        //            else if (cInt == pInt)
+        //            {
+        //                char cLetter = list[current].ImageName[list[current].ImageName.Length - 1];
+        //                char pLetter = list[previous].ImageName[list[previous].ImageName.Length - 1];
 
-                        if (cLetter < pLetter)
-                        {
-                            SwapListEntries(previous, current, ref list);
-                            change = true;
-                        }
-                    }
+        //                if (cLetter < pLetter)
+        //                {
+        //                    SwapListEntries(previous, current, ref list);
+        //                    change = true;
+        //                }
+        //            }
 
-                }
-            } while (change);
+        //        }
+        //    } while (change);
 
-        }
+        //}
 
         private static void SwapListEntries(int posA, int posB, ref List<RenderItem> list)
         {
