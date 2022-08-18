@@ -116,16 +116,18 @@ namespace RenderTableCreator
 
             if (line.ToLower().StartsWith("scene expression") ||
                 line.ToLower().StartsWith("scene black") ||
+                line.ToLower().StartsWith("show screen save_now(") ||
                 (line.ToLower().Contains("ignore") && line.ToLower().Contains("anim")) )
             {
                 skip = true; 
             }
             // END BUGFIX 
             
-            else if (line.ToLower().StartsWith("scene") || line.ToLower().StartsWith("show") || line.ToLower().StartsWith("#!") && !skip)
+            else if (line.ToLower().StartsWith("scene") || line.ToLower().StartsWith("show") || line.ToLower().StartsWith("#! ") && !skip)
             {
+                
 
-                string[] lineArgs = line.Split(' ');
+                string[] lineArgs = line.Split(' ',StringSplitOptions.RemoveEmptyEntries);                
                 string imageName = lineArgs[1];
 
                 // BUGFIX: Image names that end with an underscore
@@ -161,7 +163,7 @@ namespace RenderTableCreator
 
                 if(line.ToLower().StartsWith("#!"))
                 {
-                    imageDesc += "KIWII IMAGE: ";
+                    imageDesc += " IMAGE: ";
                 }
 
                 if (lineArgs.Length > 2)
